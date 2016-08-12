@@ -9,7 +9,7 @@ class DefaultNameConan(ConanFile):
     name = "DefaultName"
     version = "0.1"
     settings = "os", "compiler", "build_type", "arch"
-    requires = "libbson/1.3.5@%s/%s" % (username, channel)
+    requires = "libbson/1.4.0@%s/%s" % (username, channel)
     generators = "cmake"
 
     def build(self):

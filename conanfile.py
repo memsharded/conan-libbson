@@ -5,7 +5,7 @@ import shutil
 
 class LibbsonConan(ConanFile):
     name = "libbson"
-    version = "1.3.5"
+    version = "1.4.0"
     url = "https://github.com/theirix/conan-libbson"
     license = "https://github.com/mongodb/libbson/blob/master/COPYING"
     FOLDER_NAME = 'libbson-%s' % version
@@ -20,7 +20,7 @@ class LibbsonConan(ConanFile):
         tarball_name = self.FOLDER_NAME + '.tar.gz'
         download("https://github.com/mongodb/libbson/releases/download/%s/%s.tar.gz"
                  % (self.version, self.FOLDER_NAME), tarball_name)
-        check_sha1(tarball_name, "4eb4ac680aa162a838bfe29c382f607bd34214d2")
+        check_sha1(tarball_name, "b65bb26bef8d0e0838cb70bf7aad560ec616654f")
         untargz(tarball_name)
         os.unlink(tarball_name)
 
