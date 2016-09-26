@@ -13,7 +13,7 @@ class LibbsonConan(ConanFile):
     options = {"shared": [True, False]}
     default_options = "shared=False"
 
-    def config(self):
+    def config_options(self):
         del self.settings.compiler.libcxx
 
     def source(self):
