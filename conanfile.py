@@ -5,7 +5,7 @@ import shutil
 
 class LibbsonConan(ConanFile):
     name = "libbson"
-    version = "1.4.0"
+    version = "1.5.0"
     url = "https://github.com/theirix/conan-libbson"
     license = "https://github.com/mongodb/libbson/blob/master/COPYING"
     FOLDER_NAME = 'libbson-%s' % version
@@ -20,7 +20,7 @@ class LibbsonConan(ConanFile):
         tarball_name = self.FOLDER_NAME + '.tar.gz'
         download("https://github.com/mongodb/libbson/releases/download/%s/%s.tar.gz"
                  % (self.version, self.FOLDER_NAME), tarball_name)
-        check_sha1(tarball_name, "b65bb26bef8d0e0838cb70bf7aad560ec616654f")
+        check_sha1(tarball_name, "ac7da3f9aec8984807a71d0a18ffec709f43ab76")
         untargz(tarball_name)
         os.unlink(tarball_name)
 
@@ -56,7 +56,7 @@ class LibbsonConan(ConanFile):
         # exclude private headers
         for header in ['atomic', 'clock', 'compat', 'config', 'context', 'endian', 'error', 'iter', 'json',\
                        'keys', 'macros', 'md5', 'memory', 'oid', 'reader', 'stdint', 'string', 'types', 'utf8',\
-                       'value', 'version-functions', 'version', 'writer']:
+                       'value', 'version-functions', 'version', 'writer', 'decimal128']:
             self.copy('bson-'+header+'.h', dst="include/libbson-1.0", src="%s/src/bson" % (self.FOLDER_NAME), keep_path=False)
         self.copy("bcon.h", dst="include/libbson-1.0", src="%s/src/bson/" % (self.FOLDER_NAME), keep_path=False)
         self.copy("bson.h", dst="include/libbson-1.0", src="%s/src/bson" % (self.FOLDER_NAME), keep_path=False)
