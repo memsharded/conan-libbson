@@ -5,7 +5,7 @@ import shutil
 
 class LibbsonConan(ConanFile):
     name = "libbson"
-    version = "1.5.2"
+    version = "1.6.0"
     url = "https://github.com/theirix/conan-libbson"
     license = "https://github.com/mongodb/libbson/blob/master/COPYING"
     description = "A BSON utility library."
@@ -21,7 +21,7 @@ class LibbsonConan(ConanFile):
         tarball_name = self.FOLDER_NAME + '.tar.gz'
         download("https://github.com/mongodb/libbson/releases/download/%s/%s.tar.gz"
                  % (self.version, self.FOLDER_NAME), tarball_name)
-        check_sha1(tarball_name, "f608a75c4ecde6e5d80ab07cf41991ed7a7f72f0")
+        check_sha1(tarball_name, "c56f4ba0b164b959210b362ce7b533f34f28faa3")
         untargz(tarball_name)
         os.unlink(tarball_name)
 
@@ -39,6 +39,10 @@ class LibbsonConan(ConanFile):
                 suffix += " --enable-shared --disable-static"
             else:
                 suffix += " --disable-shared --enable-static"
+
+            # refresh configure
+            cmd = 'cd %s/%s && %s autoreconf --force --verbose --install -I build/autotools' % (self.conanfile_directory, self.FOLDER_NAME, env_line)
+            self.run(cmd)
 
             # disable rpath build
             old_str = "-install_name \$rpath/"
@@ -59,7 +63,7 @@ class LibbsonConan(ConanFile):
                        'keys', 'macros', 'md5', 'memory', 'oid', 'reader', 'stdint', 'string', 'types', 'utf8',\
                        'value', 'version-functions', 'version', 'writer', 'decimal128']:
             self.copy('bson-'+header+'.h', dst="include/libbson-1.0", src="%s/src/bson" % (self.FOLDER_NAME), keep_path=False)
-        self.copy("bcon.h", dst="include/libbson-1.0", src="%s/src/bson/" % (self.FOLDER_NAME), keep_path=False)
+        self.copy("bcon.h", dst="include/libbson-1.0", src="%s/src/bson" % (self.FOLDER_NAME), keep_path=False)
         self.copy("bson.h", dst="include/libbson-1.0", src="%s/src/bson" % (self.FOLDER_NAME), keep_path=False)
         if self.options.shared:
             if self.settings.os == "Macos":
