@@ -56,6 +56,8 @@ class LibbsonConan(ConanFile):
                 self.run(cmd)
 
     def package(self):
+        os.rename("%s/COPYING" % (self.FOLDER_NAME), "%s/LICENSE" % (self.FOLDER_NAME))
+        self.copy("license*", src="%s" % (self.FOLDER_NAME), dst="licenses", ignore_case=True, keep_path=False)
         # exclude private headers
         for header in ['atomic', 'clock', 'compat', 'config', 'context', 'endian', 'error', 'iter', 'json',\
                        'keys', 'macros', 'md5', 'memory', 'oid', 'reader', 'stdint', 'string', 'types', 'utf8',\
