@@ -1,4 +1,4 @@
-from conans import ConanFile, AutoToolsBuildEnvironment
+from conans import ConanFile, AutoToolsBuildEnvironment, CMake
 from conans.tools import download, untargz, check_sha1, replace_in_file, environment_append
 import os
 
@@ -56,6 +56,16 @@ class LibbsonConan(ConanFile):
                 self.output.warn('Running: ' + cmd)
                 self.run(cmd)
 
+        if self.settings.os == "Windows":
+            cmake = CMake(self)
+            if self.options.shared:
+                cmake.definitions["ENABLED_STATIC"] = "OFF"
+            else:
+                cmake.definitions["ENABLED_STATIC"] = "ON"
+            cmake.configure(source_dir=self.conanfile_directory, build_dir=("%s/_inst" % (self.FOLDER_NAME)))
+            cmake.build()
+            cmake.install()
+
     def package(self):
         os.rename("%s/COPYING" % (self.FOLDER_NAME), "%s/LICENSE" % (self.FOLDER_NAME))
         self.copy("license*", src="%s" % (self.FOLDER_NAME), dst="licenses", ignore_case=True, keep_path=False)
@@ -63,10 +73,14 @@ class LibbsonConan(ConanFile):
         if self.options.shared:
             if self.settings.os == "Macos":
                 self.copy(pattern="*.dylib", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
+            elif self.settings.os == "Windows":
+                self.copy(pattern="*.dll*", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
             else:
                 self.copy(pattern="*.so*", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
         else:
             self.copy(pattern="*bson*.a", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
+        if self.settings.os == "Windows":
+            self.copy(pattern="*.lib*", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ['bson-1.0']
