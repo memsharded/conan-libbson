@@ -4,7 +4,7 @@ import os
 
 class LibbsonConan(ConanFile):
     name = "libbson"
-    version = "1.6.2"
+    version = "1.7.0"
     url = "https://github.com/theirix/conan-libbson"
     license = "https://github.com/mongodb/libbson/blob/master/COPYING"
     description = "A BSON utility library."
@@ -20,7 +20,7 @@ class LibbsonConan(ConanFile):
         tarball_name = self.FOLDER_NAME + '.tar.gz'
         download("https://github.com/mongodb/libbson/releases/download/%s/%s.tar.gz"
                  % (self.version, self.FOLDER_NAME), tarball_name)
-        check_sha1(tarball_name, "67e5e290eded1f9d130b476964bc99b5fc15dfb2")
+        check_sha1(tarball_name, "5c8119a7500a9131e0a6b0c7357bbac4069ade56")
         untargz(tarball_name)
         os.unlink(tarball_name)
 
