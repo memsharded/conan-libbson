@@ -1,21 +1,15 @@
 from conans import ConanFile, CMake
 import os
 
-# This easily allows to copy the package in other user or channel
-channel = os.getenv("CONAN_CHANNEL", "stable")
-username = os.getenv("CONAN_USERNAME", "theirix")
-
-class DefaultNameConan(ConanFile):
-    name = "DefaultName"
-    version = "0.1"
+class LibbsonTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    requires = "libbson/1.6.2@%s/%s" % (username, channel)
     generators = "cmake"
 
     def build(self):
-        cmake = CMake(self.settings)
-        self.run('cmake "%s" %s' % (self.conanfile_directory, cmake.command_line))
-        self.run("cmake --build . %s" % cmake.build_config)
+        cmake = CMake(self)
+        # Current dir is "test_package/build/<build_id>" and CMakeLists.txt is in "test_package"
+        cmake.configure(source_dir=self.conanfile_directory, build_dir="./")
+        cmake.build()
 
     def imports(self):
         self.copy(pattern="*.dll", dst="bin", src="bin")
@@ -23,4 +17,5 @@ class DefaultNameConan(ConanFile):
         self.copy(pattern="*.dylib", dst="bin", src="lib")
 
     def test(self):
-        self.run("cd bin && .%stestapp" % os.sep)
+        os.chdir("bin")
+        self.run(".%stestapp" % os.sep)
