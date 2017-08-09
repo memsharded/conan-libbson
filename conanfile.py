@@ -47,31 +47,26 @@ class LibbsonConan(ConanFile):
                 new_str = "-install_name "
                 replace_in_file("%s/%s/configure" % (self.conanfile_directory, self.FOLDER_NAME), old_str, new_str)
 
-                cmd = 'cd %s/%s && ./configure %s' % (self.conanfile_directory, self.FOLDER_NAME, suffix)
+                cmd = 'cd %s/%s && ./configure --prefix=%s/%s/_inst %s' % (self.conanfile_directory, self.FOLDER_NAME,
+                                                                        self.conanfile_directory, self.FOLDER_NAME, suffix)
                 self.output.warn('Running: ' + cmd)
                 self.run(cmd)
 
-                cmd = 'cd %s/%s && make' % (self.conanfile_directory, self.FOLDER_NAME)
+                cmd = 'cd %s/%s && make install' % (self.conanfile_directory, self.FOLDER_NAME)
                 self.output.warn('Running: ' + cmd)
                 self.run(cmd)
 
     def package(self):
         os.rename("%s/COPYING" % (self.FOLDER_NAME), "%s/LICENSE" % (self.FOLDER_NAME))
         self.copy("license*", src="%s" % (self.FOLDER_NAME), dst="licenses", ignore_case=True, keep_path=False)
-        # exclude private headers
-        for header in ['atomic', 'clock', 'compat', 'config', 'context', 'endian', 'error', 'iter', 'json',\
-                       'keys', 'macros', 'md5', 'memory', 'oid', 'reader', 'stdint', 'string', 'types', 'utf8',\
-                       'value', 'version-functions', 'version', 'writer', 'decimal128']:
-            self.copy('bson-'+header+'.h', dst="include/libbson-1.0", src="%s/src/bson" % (self.FOLDER_NAME), keep_path=False)
-        self.copy("bcon.h", dst="include/libbson-1.0", src="%s/src/bson" % (self.FOLDER_NAME), keep_path=False)
-        self.copy("bson.h", dst="include/libbson-1.0", src="%s/src/bson" % (self.FOLDER_NAME), keep_path=False)
+        self.copy(pattern="*.h", dst="include", src="%s/_inst/include" % (self.FOLDER_NAME), keep_path=True)
         if self.options.shared:
             if self.settings.os == "Macos":
-                self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+                self.copy(pattern="*.dylib", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
             else:
-                self.copy(pattern="*.so*", dst="lib", keep_path=False)
+                self.copy(pattern="*.so*", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
         else:
-            self.copy(pattern="*bson*.a", dst="lib", keep_path=False)
+            self.copy(pattern="*bson*.a", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ['bson-1.0']
