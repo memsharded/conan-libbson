@@ -93,7 +93,7 @@ class LibbsonConan(ConanFile):
             if self.settings.os == "Macos":
                 self.copy(pattern="*.dylib", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
             elif self.settings.os == "Windows":
-                self.copy(pattern="*.dll*", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
+                self.copy(pattern="*.dll*", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="bin", keep_path=False)
             else:
                 self.copy(pattern="*.so*", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
         else:
