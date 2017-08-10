@@ -1,6 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake
 from conans.tools import download, untargz, check_sha1, replace_in_file, environment_append
 import os
+import shutil
 
 class LibbsonConan(ConanFile):
     name = "libbson"
@@ -12,6 +13,8 @@ class LibbsonConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
     default_options = "shared=False"
+    exports = "CMakeLists.txt"
+    generators = "cmake", "txt"
 
     def config_options(self):
         del self.settings.compiler.libcxx
@@ -29,6 +32,8 @@ class LibbsonConan(ConanFile):
         check_sha1(tarball_name, "5c8119a7500a9131e0a6b0c7357bbac4069ade56")
         untargz(tarball_name)
         os.unlink(tarball_name)
+        shutil.move("%s/CMakeLists.txt" % self.FOLDER_NAME, "%s/CMakeListsOriginal.cmake" % self.FOLDER_NAME)
+        shutil.move("CMakeLists.txt", "%s/CMakeLists.txt" % self.FOLDER_NAME)
 
     def build(self):
 
@@ -111,6 +116,6 @@ class LibbsonConan(ConanFile):
             self.cpp_info.libs.extend(["pthread", "rt"])
         if self.settings.os == "Windows":
             if not self.options.shared:
-              self.cpp_info.libs.extend(["ws2_32"])
-              self.cpp_info.defines.append("BSON_STATIC=1")
+                self.cpp_info.libs.extend(["ws2_32"])
+                self.cpp_info.defines.append("BSON_STATIC=1")
 
