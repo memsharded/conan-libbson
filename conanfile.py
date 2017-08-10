@@ -32,10 +32,7 @@ class LibbsonConan(ConanFile):
     def build(self):
 
         # cmake support is still experimental for unix
-        if self.settings.os == "Windows":
-            use_cmake = True
-        else:
-            use_cmake = False
+        use_cmake = self.settings.os == "Windows"
 
         if use_cmake:
             cmake = CMake(self)
@@ -72,7 +69,7 @@ class LibbsonConan(ConanFile):
                 replace_in_file("%s/%s/configure" % (self.conanfile_directory, self.FOLDER_NAME), old_str, new_str)
 
                 cmd = 'cd %s/%s && ./configure --prefix=%s/%s/_inst %s' % (self.conanfile_directory, self.FOLDER_NAME,
-                                                                        self.conanfile_directory, self.FOLDER_NAME, suffix)
+                                                                           self.conanfile_directory, self.FOLDER_NAME, suffix)
                 self.output.warn('Running: ' + cmd)
                 self.run(cmd)
 
@@ -109,4 +106,3 @@ class LibbsonConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.libs.extend(["ws2_32"])
                 self.cpp_info.defines.append("BSON_STATIC=1")
-
