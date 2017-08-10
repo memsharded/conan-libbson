@@ -64,7 +64,7 @@ class LibbsonConan(ConanFile):
                 self.run(cmd)
 
                 # disable rpath build
-                old_str = "-install_name \$rpath/"
+                old_str = "-install_name \\$rpath/"
                 new_str = "-install_name "
                 replace_in_file("%s/%s/configure" % (self.conanfile_directory, self.FOLDER_NAME), old_str, new_str)
 
