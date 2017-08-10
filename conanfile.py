@@ -16,6 +16,12 @@ class LibbsonConan(ConanFile):
     def config_options(self):
         del self.settings.compiler.libcxx
 
+    def print_dir(self):
+        self.output.info('dir: ' + os.getcwd())
+        for root, _dirnames, filenames in os.walk('.'):
+            for filename in filenames:
+                self.output.info(" " + os.path.join(root, filename))
+
     def source(self):
         tarball_name = self.FOLDER_NAME + '.tar.gz'
         download("https://github.com/mongodb/libbson/releases/download/%s/%s.tar.gz"
@@ -26,7 +32,29 @@ class LibbsonConan(ConanFile):
 
     def build(self):
 
-        if self.settings.os == "Linux" or self.settings.os == "Macos":
+        # cmake support is still experimental for unix
+        if self.settings.os == "Windows":
+            use_cmake = True
+        else:
+            use_cmake = False
+        if self.settings.os == "Macos":
+            use_cmake = True
+
+        if use_cmake:
+            cmake = CMake(self)
+            if self.options.shared:
+                cmake.definitions["ENABLE_STATIC"] = "OFF"
+                cmake.definitions["ENABLE_TESTS"] = "OFF"
+            else:
+                cmake.definitions["ENABLE_STATIC"] = "ON"
+            cmake.definitions["CMAKE_INSTALL_PREFIX"] = ("%s/%s/_inst" % (self.conanfile_directory, self.FOLDER_NAME))
+            #cmake.configure(source_dir=("%s/%s" % (self.conanfile_directory, self.FOLDER_NAME)), build_dir=("%s/_inst" % (self.FOLDER_NAME)))
+            cmake.configure(source_dir=("%s/%s" % (self.conanfile_directory, self.FOLDER_NAME)))
+            cmake.build()
+            cmake.install()
+            self.print_dir()
+
+        else:
 
             env_build = AutoToolsBuildEnvironment(self)
 
@@ -56,17 +84,10 @@ class LibbsonConan(ConanFile):
                 self.output.warn('Running: ' + cmd)
                 self.run(cmd)
 
-        if self.settings.os == "Windows":
-            cmake = CMake(self)
-            if self.options.shared:
-                cmake.definitions["ENABLED_STATIC"] = "OFF"
-            else:
-                cmake.definitions["ENABLED_STATIC"] = "ON"
-            cmake.configure(source_dir=self.conanfile_directory, build_dir=("%s/_inst" % (self.FOLDER_NAME)))
-            cmake.build()
-            cmake.install()
 
     def package(self):
+        self.print_dir()
+
         os.rename("%s/COPYING" % (self.FOLDER_NAME), "%s/LICENSE" % (self.FOLDER_NAME))
         self.copy("license*", src="%s" % (self.FOLDER_NAME), dst="licenses", ignore_case=True, keep_path=False)
         self.copy(pattern="*.h", dst="include", src="%s/_inst/include" % (self.FOLDER_NAME), keep_path=True)
@@ -83,7 +104,10 @@ class LibbsonConan(ConanFile):
             self.copy(pattern="*.lib*", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ['bson-1.0']
+        if self.options.shared:
+            self.cpp_info.libs = ['bson-1.0']
+        else:
+            self.cpp_info.libs = ['bson-static-1.0']
         self.cpp_info.includedirs = ['include/libbson-1.0']
         if self.settings.os == "Linux":
             self.cpp_info.libs.extend(["pthread", "rt"])
