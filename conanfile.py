@@ -19,12 +19,6 @@ class LibbsonConan(ConanFile):
     def config_options(self):
         del self.settings.compiler.libcxx
 
-    def print_dir(self):
-        self.output.info('dir: ' + os.getcwd())
-        for root, _dirnames, filenames in os.walk('.'):
-            for filename in filenames:
-                self.output.info(" " + os.path.join(root, filename))
-
     def source(self):
         tarball_name = self.FOLDER_NAME + '.tar.gz'
         download("https://github.com/mongodb/libbson/releases/download/%s/%s.tar.gz"
@@ -55,7 +49,6 @@ class LibbsonConan(ConanFile):
             cmake.configure(source_dir=("%s/%s" % (self.conanfile_directory, self.FOLDER_NAME)))
             cmake.build()
             cmake.install()
-            self.print_dir()
 
         else:
 
@@ -89,8 +82,6 @@ class LibbsonConan(ConanFile):
 
 
     def package(self):
-        self.print_dir()
-
         os.rename("%s/COPYING" % (self.FOLDER_NAME), "%s/LICENSE" % (self.FOLDER_NAME))
         self.copy("license*", src="%s" % (self.FOLDER_NAME), dst="licenses", ignore_case=True, keep_path=False)
         self.copy(pattern="*.h", dst="include", src="%s/_inst/include" % (self.FOLDER_NAME), keep_path=True)
