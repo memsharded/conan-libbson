@@ -37,8 +37,6 @@ class LibbsonConan(ConanFile):
             use_cmake = True
         else:
             use_cmake = False
-        if self.settings.os == "Macos":
-            use_cmake = True
 
         if use_cmake:
             cmake = CMake(self)
