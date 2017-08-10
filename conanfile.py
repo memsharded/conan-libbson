@@ -112,4 +112,5 @@ class LibbsonConan(ConanFile):
         if self.settings.os == "Windows":
             if not self.options.shared:
               self.cpp_info.libs.extend(["ws2_32"])
+              self.cpp_info.defines.append("BSON_STATIC=1")
 
