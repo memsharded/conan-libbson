@@ -109,3 +109,7 @@ class LibbsonConan(ConanFile):
         self.cpp_info.includedirs = ['include/libbson-1.0']
         if self.settings.os == "Linux":
             self.cpp_info.libs.extend(["pthread", "rt"])
+        if self.settings.os == "Windows":
+            if not self.options.shared:
+              self.cpp_info.libs.extend(["ws2_32"])
+
