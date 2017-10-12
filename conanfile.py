@@ -5,7 +5,7 @@ import shutil
 
 class LibbsonConan(ConanFile):
     name = "libbson"
-    version = "1.8.0"
+    version = "1.8.1"
     url = "https://github.com/theirix/conan-libbson"
     license = "https://github.com/mongodb/libbson/blob/master/COPYING"
     description = "A BSON utility library."
@@ -23,7 +23,7 @@ class LibbsonConan(ConanFile):
         tarball_name = self.FOLDER_NAME + '.tar.gz'
         download("https://github.com/mongodb/libbson/releases/download/%s/%s.tar.gz"
                  % (self.version, self.FOLDER_NAME), tarball_name)
-        check_sha1(tarball_name, "5e5e5638d6d22132f67543df7bbd6d713eec0e90")
+        check_sha1(tarball_name, "fd1090e60e9fac5e61d58a5604608be01eb02bc4")
         untargz(tarball_name)
         os.unlink(tarball_name)
         shutil.move("%s/CMakeLists.txt" % self.FOLDER_NAME, "%s/CMakeListsOriginal.cmake" % self.FOLDER_NAME)
