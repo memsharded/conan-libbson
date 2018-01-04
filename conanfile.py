@@ -1,7 +1,5 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, CMake
-from conans.tools import download, untargz, check_sha1, replace_in_file, environment_append
+from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
 import os
-import shutil
 
 class LibbsonConan(ConanFile):
     name = "libbson"
@@ -13,37 +11,29 @@ class LibbsonConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
     default_options = "shared=False"
-    exports = "CMakeLists.txt"
+    exports = ["LICENSE.md"]
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "txt"
 
     def config_options(self):
         del self.settings.compiler.libcxx
 
     def source(self):
-        tarball_name = self.FOLDER_NAME + '.tar.gz'
-        download("https://github.com/mongodb/libbson/releases/download/%s/%s.tar.gz"
-                 % (self.version, self.FOLDER_NAME), tarball_name)
-        check_sha1(tarball_name, "fd1090e60e9fac5e61d58a5604608be01eb02bc4")
-        untargz(tarball_name)
-        os.unlink(tarball_name)
-        shutil.move("%s/CMakeLists.txt" % self.FOLDER_NAME, "%s/CMakeListsOriginal.cmake" % self.FOLDER_NAME)
-        shutil.move("CMakeLists.txt", "%s/CMakeLists.txt" % self.FOLDER_NAME)
+        tools.get("https://github.com/mongodb/libbson/releases/download/%s/%s.tar.gz"
+                 % (self.version, self.FOLDER_NAME))
+        os.rename("%s/CMakeLists.txt" % self.FOLDER_NAME, "%s/CMakeListsOriginal.txt" % self.FOLDER_NAME)
+        os.rename("CMakeLists.txt", "%s/CMakeLists.txt" % self.FOLDER_NAME)
 
     def build(self):
-
         # cmake support is still experimental for unix
         use_cmake = self.settings.os == "Windows"
 
         if use_cmake:
             cmake = CMake(self)
-            if self.options.shared:
-                cmake.definitions["ENABLE_STATIC"] = "OFF"
-                cmake.definitions["ENABLE_TESTS"] = "OFF"
-            else:
-                cmake.definitions["ENABLE_STATIC"] = "ON"
-            cmake.definitions["CMAKE_INSTALL_PREFIX"] = ("%s/%s/_inst" % (self.conanfile_directory, self.FOLDER_NAME))
-            #cmake.configure(source_dir=("%s/%s" % (self.conanfile_directory, self.FOLDER_NAME)), build_dir=("%s/_inst" % (self.FOLDER_NAME)))
-            cmake.configure(source_dir=("%s/%s" % (self.conanfile_directory, self.FOLDER_NAME)))
+            cmake.definitions["ENABLE_STATIC"] = not self.options.shared
+            cmake.definitions["ENABLE_TESTS"] = False
+            cmake.definitions["CMAKE_INSTALL_PREFIX"] = ("%s/%s/_inst" % (self.build_folder, self.FOLDER_NAME))
+            cmake.configure(source_folder=self.FOLDER_NAME)
             cmake.build()
             cmake.install()
 
@@ -58,24 +48,22 @@ class LibbsonConan(ConanFile):
             else:
                 suffix += " --disable-shared --enable-static"
 
-            with environment_append(env_build.vars):
-                # refresh configure
-                cmd = 'cd %s/%s && autoreconf --force --verbose --install -I build/autotools' % (self.conanfile_directory, self.FOLDER_NAME)
-                self.run(cmd)
+            with tools.environment_append(env_build.vars):
+                with tools.chdir(os.path.join(self.FOLDER_NAME)):
+                    # refresh configure
+                    cmd = 'autoreconf --force --verbose --install -I build/autotools'
+                    self.run(cmd)
 
-                # disable rpath build
-                old_str = "-install_name \\$rpath/"
-                new_str = "-install_name "
-                replace_in_file("%s/%s/configure" % (self.conanfile_directory, self.FOLDER_NAME), old_str, new_str)
+                    # disable rpath build
+                    tools.replace_in_file("configure", r"-install_name \$rpath/", "-install_name ")
 
-                cmd = 'cd %s/%s && ./configure --prefix=%s/%s/_inst %s' % (self.conanfile_directory, self.FOLDER_NAME,
-                                                                           self.conanfile_directory, self.FOLDER_NAME, suffix)
-                self.output.warn('Running: ' + cmd)
-                self.run(cmd)
+                    cmd = './configure --prefix=%s/%s/_inst %s' % (self.build_folder, self.FOLDER_NAME, suffix)
+                    self.output.warn('Running: ' + cmd)
+                    self.run(cmd)
 
-                cmd = 'cd %s/%s && make install' % (self.conanfile_directory, self.FOLDER_NAME)
-                self.output.warn('Running: ' + cmd)
-                self.run(cmd)
+                    cmd = 'make install'
+                    self.output.warn('Running: ' + cmd)
+                    self.run(cmd)
 
 
     def package(self):

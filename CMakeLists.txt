@@ -1,5 +1,7 @@
-PROJECT(conan-libbson)
 cmake_minimum_required(VERSION 3.1)
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+project(cmake_wrapper)
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/../conanbuildinfo.cmake)
 conan_basic_setup()
-include("CMakeListsOriginal.cmake")
+
+include("CMakeListsOriginal.txt")
