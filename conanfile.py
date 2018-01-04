@@ -30,9 +30,11 @@ class LibbsonConan(ConanFile):
 
         if use_cmake:
             cmake = CMake(self)
-            cmake.definitions["ENABLE_STATIC"] = not self.options.shared
+            # upstream cmake is flawed and doesn't understand boolean values other than ON/OFF
+            cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
             cmake.definitions["ENABLE_TESTS"] = False
             cmake.definitions["CMAKE_INSTALL_PREFIX"] = ("%s/%s/_inst" % (self.build_folder, self.FOLDER_NAME))
+            cmake.verbose = True
             cmake.configure(source_folder=self.FOLDER_NAME)
             cmake.build()
             cmake.install()
