@@ -3,7 +3,7 @@ import os
 
 class LibbsonConan(ConanFile):
     name = "libbson"
-    version = "1.8.1"
+    version = "1.9.0"
     url = "https://github.com/theirix/conan-libbson"
     license = "https://github.com/mongodb/libbson/blob/master/COPYING"
     description = "A BSON utility library."
