@@ -7,7 +7,6 @@ class LibbsonConan(ConanFile):
     url = "https://github.com/theirix/conan-libbson"
     license = "https://github.com/mongodb/libbson/blob/master/COPYING"
     description = "A BSON utility library."
-    FOLDER_NAME = 'libbson-%s' % version
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
     default_options = "shared=False"
@@ -19,10 +18,11 @@ class LibbsonConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def source(self):
-        tools.get("https://github.com/mongodb/libbson/releases/download/%s/%s.tar.gz"
-                 % (self.version, self.FOLDER_NAME))
-        os.rename("%s/CMakeLists.txt" % self.FOLDER_NAME, "%s/CMakeListsOriginal.txt" % self.FOLDER_NAME)
-        os.rename("CMakeLists.txt", "%s/CMakeLists.txt" % self.FOLDER_NAME)
+        tools.get("https://github.com/mongodb/libbson/releases/download/%s/libbson-%s.tar.gz"
+                  % (self.version, self.version))
+        os.rename("libbson-%s" % self.version, "sources")
+        os.rename("sources/CMakeLists.txt", "sources/CMakeListsOriginal.txt")
+        os.rename("CMakeLists.txt", "sources/CMakeLists.txt")
 
     def build(self):
         # cmake support is still experimental for unix
@@ -33,9 +33,9 @@ class LibbsonConan(ConanFile):
             # upstream cmake is flawed and doesn't understand boolean values other than ON/OFF
             cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
             cmake.definitions["ENABLE_TESTS"] = False
-            cmake.definitions["CMAKE_INSTALL_PREFIX"] = ("%s/%s/_inst" % (self.build_folder, self.FOLDER_NAME))
+            cmake.definitions["CMAKE_INSTALL_PREFIX"] = ("%s/_inst" % self.build_folder)
             cmake.verbose = True
-            cmake.configure(source_folder=self.FOLDER_NAME)
+            cmake.configure(source_folder="sources")
             cmake.build()
             cmake.install()
 
@@ -44,45 +44,38 @@ class LibbsonConan(ConanFile):
             env_build = AutoToolsBuildEnvironment(self)
 
             # compose configure options
-            suffix = ''
+            configure_args = ['--prefix=%s/_inst' % self.build_folder]
             if self.options.shared:
-                suffix += " --enable-shared --disable-static"
+                configure_args.extend(["--enable-shared", "--disable-static"])
             else:
-                suffix += " --disable-shared --enable-static"
+                configure_args.extend(["--disable-shared", "--enable-static"])
 
-            with tools.environment_append(env_build.vars):
-                with tools.chdir(os.path.join(self.FOLDER_NAME)):
-                    # refresh configure
-                    cmd = 'autoreconf --force --verbose --install -I build/autotools'
-                    self.run(cmd)
+            with tools.chdir("sources"):
+                # refresh configure
+                self.run('autoreconf --force --verbose --install -I build/autotools')
 
-                    # disable rpath build
-                    tools.replace_in_file("configure", r"-install_name \$rpath/", "-install_name ")
+                # disable rpath build
+                tools.replace_in_file("configure", r"-install_name \$rpath/", "-install_name ")
 
-                    cmd = './configure --prefix=%s/%s/_inst %s' % (self.build_folder, self.FOLDER_NAME, suffix)
-                    self.output.warn('Running: ' + cmd)
-                    self.run(cmd)
+                env_build.configure(args=configure_args)
 
-                    cmd = 'make install'
-                    self.output.warn('Running: ' + cmd)
-                    self.run(cmd)
+                env_build.make(args=['install'])
 
 
     def package(self):
-        os.rename("%s/COPYING" % (self.FOLDER_NAME), "%s/LICENSE" % (self.FOLDER_NAME))
-        self.copy("license*", src="%s" % (self.FOLDER_NAME), dst="licenses", ignore_case=True, keep_path=False)
-        self.copy(pattern="*.h", dst="include", src="%s/_inst/include" % (self.FOLDER_NAME), keep_path=True)
+        self.copy("copying*", src="sources", dst="licenses", ignore_case=True, keep_path=False)
+        self.copy(pattern="*.h", dst="include", src="_inst/include", keep_path=True)
         if self.options.shared:
             if self.settings.os == "Macos":
-                self.copy(pattern="*.dylib", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
+                self.copy(pattern="*.dylib", src="_inst/lib", dst="lib", keep_path=False)
             elif self.settings.os == "Windows":
-                self.copy(pattern="*.dll*", src="%s/_inst/bin" % (self.FOLDER_NAME), dst="bin", keep_path=False)
+                self.copy(pattern="*.dll*", src="_inst/bin", dst="bin", keep_path=False)
             else:
-                self.copy(pattern="*.so*", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
+                self.copy(pattern="*.so*", src="_inst/lib", dst="lib", keep_path=False)
         else:
-            self.copy(pattern="*bson*.a", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
+            self.copy(pattern="*bson*.a", src="_inst/lib", dst="lib", keep_path=False)
         if self.settings.os == "Windows":
-            self.copy(pattern="*.lib*", src="%s/_inst/lib" % (self.FOLDER_NAME), dst="lib", keep_path=False)
+            self.copy(pattern="*.lib*", src="_inst/lib", dst="lib", keep_path=False)
 
     def package_info(self):
         if self.options.shared:
