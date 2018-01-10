@@ -1,7 +1,7 @@
 
 env:
    global:
-     - CONAN_REFERENCE: "libbson/1.9.0"
+     - CONAN_REFERENCE: "libbson/1.9.1"
      - CONAN_USERNAME: "theirix"
      - CONAN_LOGIN_USERNAME: "theirix"
      - CONAN_CHANNEL: "ci"
