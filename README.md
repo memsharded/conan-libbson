@@ -27,7 +27,7 @@ If you handle multiple dependencies in your project is better to add a *conanfil
     libbson/1.9.1@theirix/stable
 
     [options]
-    libbson:shared=true # false
+    libbson:shared=True # false
     
     [generators]
     txt
