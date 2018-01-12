@@ -17,14 +17,14 @@ The packages generated with this **conanfile** can be found in [bintray](https:/
 
 ### Basic setup
 
-    $ conan install libbson/1.9.1@theirix/stable
+    $ conan install libbson/1.9.2@theirix/stable
     
 ### Project setup
 
 If you handle multiple dependencies in your project is better to add a *conanfile.txt*
     
     [requires]
-    libbson/1.9.1@theirix/stable
+    libbson/1.9.2@theirix/stable
 
     [options]
     libbson:shared=True # false
