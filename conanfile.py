@@ -1,11 +1,12 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
-import os
+import os, shutil
 
 class LibbsonConan(ConanFile):
     name = "libbson"
     version = "1.9.2"
     url = "https://github.com/theirix/conan-libbson"
-    license = "https://github.com/mongodb/libbson/blob/master/COPYING"
+    license = "Apache License 2.0 (https://github.com/mongodb/libbson/blob/master/COPYING)"
+    homepage = "https://github.com/mongodb/libbson"
     description = "A BSON utility library."
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
@@ -22,7 +23,7 @@ class LibbsonConan(ConanFile):
                   % (self.version, self.version))
         os.rename("libbson-%s" % self.version, "sources")
         os.rename("sources/CMakeLists.txt", "sources/CMakeListsOriginal.txt")
-        os.rename("CMakeLists.txt", "sources/CMakeLists.txt")
+        shutil.copy("CMakeLists.txt", "sources/CMakeLists.txt")
 
     def build(self):
         # cmake support is still experimental for unix
