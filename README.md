@@ -1,6 +1,6 @@
 [ ![Download](https://api.bintray.com/packages/theirix/conan-repo/libbson%3Atheirix/images/download.svg) ](https://bintray.com/theirix/conan-repo/libbson%3Atheirix/_latestVersion)
 [![Build Status](https://travis-ci.org/theirix/conan-libbson.svg)](https://travis-ci.org/theirix/conan-libbson)
-[![Build status](https://ci.appveyor.com/api/projects/status/2tpjv6nibq4o0ogk/branch/master?svg=true)](https://ci.appveyor.com/project/theirix/conan-libbson/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/2tpjv6nibq4o0ogk?svg=true)](https://ci.appveyor.com/project/theirix/conan-libbson)
 
 # conan-libbson
 
@@ -33,7 +33,7 @@ If you handle multiple dependencies in your project is better to add a *conanfil
     txt
     cmake
 
-Complete the installation of requirements for your project running:</small></span>
+Complete the installation of requirements for your project running:
 
     conan install . 
 
