@@ -41,9 +41,7 @@ class LibbsonConan(ConanFile):
             cmake.install()
 
         else:
-
             env_build = AutoToolsBuildEnvironment(self)
-
             # compose configure options
             configure_args = ['--prefix=%s/_inst' % self.build_folder]
             if self.options.shared:
@@ -54,14 +52,10 @@ class LibbsonConan(ConanFile):
             with tools.chdir("sources"):
                 # refresh configure
                 self.run('autoreconf --force --verbose --install -I build/autotools')
-
                 # disable rpath build
                 tools.replace_in_file("configure", r"-install_name \$rpath/", "-install_name ")
-
                 env_build.configure(args=configure_args)
-
                 env_build.make(args=['install'])
-
 
     def package(self):
         self.copy("copying*", src="sources", dst="licenses", ignore_case=True, keep_path=False)
@@ -74,7 +68,7 @@ class LibbsonConan(ConanFile):
             else:
                 self.copy(pattern="*.so*", src="_inst/lib", dst="lib", keep_path=False)
         else:
-            self.copy(pattern="*bson*.a", src="_inst/lib", dst="lib", keep_path=False)
+            self.copy(pattern="*bson*.a", src="_inst/lib", dst="lib", keep_path=False, excludes="*dll*")
         if self.settings.os == "Windows":
             self.copy(pattern="*.lib*", src="_inst/lib", dst="lib", keep_path=False)
 
