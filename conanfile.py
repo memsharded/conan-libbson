@@ -74,7 +74,7 @@ class LibbsonConan(ConanFile):
             else:
                 self.copy(pattern="*.so*", src="_inst/lib", dst="lib", keep_path=False)
         else:
-            self.copy(pattern="*bson*.a", src="_inst/lib", dst="lib", keep_path=False)
+            self.copy(pattern="*bson*.a", src="_inst/lib", dst="lib", keep_path=False, excludes='*dll*')
         if self.settings.os == "Windows":
             self.copy(pattern="*.lib*", src="_inst/lib", dst="lib", keep_path=False)
 
